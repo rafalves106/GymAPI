@@ -1,0 +1,65 @@
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: gymapi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gym_exercises_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gym_exercises_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gymapi-network
+
+  # ============================================
+  # GymAPI
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gymapi-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Connection string
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-gym_exercises_dev};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+      # JWT settings
+      JwtSettings__SecretKey: ${JWT_SECRET_KEY:-your-super-secret-key-at-least-32-characters-long}
+      JwtSettings__Issuer: ${JWT_ISSUER:-GymAPI}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-GymAPI}
+      JwtSettings__ExpirationInMinutes: ${JWT_EXPIRATION:-60}
+      # ASP.NET Core
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "${API_PORT:-5200}:8080"
+    networks:
+      - gymapi-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  gymapi-network:
+    driver: bridge

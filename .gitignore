@@ -112,3 +112,13 @@ analysis
 
 ## Docker
 docker-compose.override.yml
+
+## Coverage
+coverage/
+*.coverage
+
+## Published Output
+app/
+
+## Test Results
+test-results/

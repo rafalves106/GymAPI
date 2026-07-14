@@ -1,0 +1,14 @@
+app/
+coverage/
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+*.nupkg
+*.snupkg
+test-results/
+node_modules/
+.env

@@ -110,6 +110,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Urls.Add("http://localhost:5200");
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "healthy",
+    timestamp = DateTime.UtcNow,
+    version = "1.0.0"
+}));
 
 app.Run();
