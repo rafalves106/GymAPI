@@ -8,9 +8,9 @@ namespace GymAPI.Infrastructure.Persistence.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly GymDbContext _context;
+    private readonly AppDbContext _context;
 
-    public UserRepository(GymDbContext context)
+    public UserRepository(AppDbContext context)
     {
         _context = context;
     }
@@ -18,6 +18,24 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByEmailAsync(string email)
     {
         var entity = await _context.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower().Trim());
+        return entity is null ? null : MapToDomain(entity);
+    }
+
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Username == username.Trim());
+        return entity is null ? null : MapToDomain(entity);
+    }
+
+    public async Task<User?> GetByUsernameOrEmailAsync(string usernameOrEmail)
+    {
+        var input = usernameOrEmail.Trim();
+        var isEmail = input.Contains('@');
+
+        var entity = isEmail
+            ? await _context.Users.FirstOrDefaultAsync(u => u.Email == input.ToLower())
+            : await _context.Users.FirstOrDefaultAsync(u => u.Username == input);
+
         return entity is null ? null : MapToDomain(entity);
     }
 
@@ -35,7 +53,14 @@ public class UserRepository : IUserRepository
 
     private static User MapToDomain(UserEntity entity)
     {
-        return User.Restore(entity.Id, entity.Email, entity.PasswordHash, entity.FirstName, entity.LastName, entity.CreatedAt, entity.LastLoginAt);
+        return User.Restore(
+            entity.Id,
+            entity.Username,
+            entity.Email,
+            entity.PasswordHash,
+            entity.IsMaster,
+            entity.CreatedAt,
+            entity.LastLoginAt);
     }
 
     private static UserEntity MapToEntity(User user)
@@ -43,10 +68,10 @@ public class UserRepository : IUserRepository
         return new UserEntity
         {
             Id = user.Id,
+            Username = user.Username,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
+            IsMaster = user.IsMaster,
             CreatedAt = user.CreatedAt,
             LastLoginAt = user.LastLoginAt
         };

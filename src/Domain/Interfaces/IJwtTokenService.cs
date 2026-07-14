@@ -2,5 +2,5 @@ namespace GymAPI.Domain.Interfaces;
 
 public interface IJwtTokenService
 {
-    string GenerateToken(string userId, string email, IEnumerable<string> roles);
+    string GenerateToken(Guid userId, string username, string email, bool isMaster);
 }

@@ -16,22 +16,15 @@ public class AuthController : ControllerBase
         _authUseCases = authUseCases;
     }
 
-    /// <summary>
-    /// Register a new user
-    /// </summary>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         var response = await _authUseCases.RegisterAsync(request);
-        return Created("", response);
+        return Ok(response);
     }
 
-    /// <summary>
-    /// Login with email and password
-    /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

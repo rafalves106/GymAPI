@@ -1,23 +1,18 @@
 using System.Text;
-using GymAPI.Api.Middleware;
-using GymAPI.Infrastructure.Authentication;
 using GymAPI.Infrastructure.DependencyInjection;
+using GymAPI.Infrastructure.Persistence;
+using GymAPI.Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration
 var configuration = builder.Configuration;
 
-// Add layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(configuration);
 
-// Authentication
-var jwtSettings = configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured.");
+var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -32,90 +27,72 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ValidIssuer = configuration["Jwt:Issuer"],
+        ValidAudience = configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
     };
 });
 
 builder.Services.AddAuthorization();
-
-// Controllers
 builder.Services.AddControllers();
 
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Gym Exercises API",
-        Version = "v1",
-        Description = "A RESTful API for managing gym exercises with Hexagonal + DDD architecture"
-    });
+builder.Services.AddOpenApi();
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter your JWT token"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        var origin = configuration["Cors:Origin"] ?? "http://localhost:5173";
+        policy.WithOrigins(origin)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
-// Middleware pipeline
-app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+using (var scope = app.Services.CreateScope())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gym Exercises API v1");
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
+    var seeder = new DbSeeder(db);
+    await seeder.SeedAsync();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseExceptionHandler(error =>
+{
+    error.Run(async context =>
+    {
+        var exception = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+        var (statusCode, message) = exception switch
+        {
+            UnauthorizedAccessException ex => (StatusCodes.Status401Unauthorized, ex.Message),
+            KeyNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
+            InvalidOperationException ex => (StatusCodes.Status400BadRequest, ex.Message),
+            GymAPI.Domain.Exceptions.DomainException ex => (StatusCodes.Status400BadRequest, ex.Message),
+            _ => (StatusCodes.Status500InternalServerError, "Internal server error.")
+        };
+
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new { error = message });
+    });
 });
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Health check endpoint
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "healthy",
-    timestamp = DateTime.UtcNow,
-    version = "1.0.0"
-}));
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.Run();

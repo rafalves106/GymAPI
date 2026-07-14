@@ -1,24 +1,25 @@
 using GymAPI.Domain.Interfaces;
 using GymAPI.Infrastructure.Persistence.Context;
+using GymAPI.Infrastructure.Persistence.Repositories;
 
 namespace GymAPI.Infrastructure.Persistence.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly GymDbContext _context;
-    private IExerciseRepository? _exerciseRepository;
-    private ITrainingRepository? _trainingRepository;
+    private readonly AppDbContext _context;
+    private IWorkoutRepository? _workoutRepository;
+    private ISessionRepository? _sessionRepository;
 
-    public UnitOfWork(GymDbContext context)
+    public UnitOfWork(AppDbContext context)
     {
         _context = context;
     }
 
-    public IExerciseRepository Exercises =>
-        _exerciseRepository ??= new ExerciseRepository(_context);
+    public IWorkoutRepository Workouts =>
+        _workoutRepository ??= new WorkoutRepository(_context);
 
-    public ITrainingRepository Trainings =>
-        _trainingRepository ??= new TrainingRepository(_context);
+    public ISessionRepository Sessions =>
+        _sessionRepository ??= new SessionRepository(_context);
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

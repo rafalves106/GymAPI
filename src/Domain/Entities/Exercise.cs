@@ -1,138 +1,64 @@
-using GymAPI.Domain.Enums;
 using GymAPI.Domain.Exceptions;
-using GymAPI.Domain.ValueObjects;
 
 namespace GymAPI.Domain.Entities;
 
 public class Exercise
 {
-    private readonly List<MuscleGroupType> _muscleGroups = new();
-    private readonly List<EquipmentType> _equipments = new();
-
     public Guid Id { get; private set; }
-    public ExerciseName Name { get; private set; }
-    public Description Description { get; private set; }
-    public IReadOnlyCollection<MuscleGroupType> MuscleGroups => _muscleGroups.AsReadOnly();
-    public IReadOnlyCollection<EquipmentType> Equipments => _equipments.AsReadOnly();
-    public DifficultyLevel DifficultyLevel { get; private set; }
-    public string? VideoUrl { get; private set; }
-    public string? ExternalApiId { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
+    public Guid WorkoutId { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public int TargetSets { get; private set; }
+    public int TargetReps { get; private set; }
+    public int RestSeconds { get; private set; }
+    public int Order { get; private set; }
 
-    private Exercise()
-    {
-        Name = null!;
-        Description = null!;
-    }
+    private Exercise() { }
 
-    private Exercise(
-        Guid id,
-        ExerciseName name,
-        Description description,
-        IEnumerable<MuscleGroupType> muscleGroups,
-        IEnumerable<EquipmentType> equipments,
-        DifficultyLevel difficultyLevel,
-        string? videoUrl,
-        string? externalApiId)
+    private Exercise(Guid id, Guid workoutId, string name, int targetSets, int targetReps, int restSeconds, int order)
     {
         Id = id;
+        WorkoutId = workoutId;
         Name = name;
-        Description = description;
-        DifficultyLevel = difficultyLevel;
-        VideoUrl = videoUrl;
-        ExternalApiId = externalApiId;
-        CreatedAt = DateTime.UtcNow;
-
-        foreach (var muscleGroup in muscleGroups)
-            _muscleGroups.Add(muscleGroup);
-
-        foreach (var equipment in equipments)
-            _equipments.Add(equipment);
+        TargetSets = targetSets;
+        TargetReps = targetReps;
+        RestSeconds = restSeconds;
+        Order = order;
     }
 
-    public static Exercise Create(
-        ExerciseName name,
-        Description description,
-        IEnumerable<MuscleGroupType> muscleGroups,
-        IEnumerable<EquipmentType> equipments,
-        DifficultyLevel difficultyLevel,
-        string? videoUrl = null,
-        string? externalApiId = null)
+    public static Exercise Create(Guid workoutId, string name, int targetSets, int targetReps, int restSeconds, int order)
     {
-        if (muscleGroups == null || !muscleGroups.Any())
-            throw new DomainException("At least one muscle group is required.");
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainException("Exercise name is required.");
 
-        if (equipments == null || !equipments.Any())
-            throw new DomainException("At least one equipment is required.");
+        if (targetSets <= 0)
+            throw new DomainException("Target sets must be greater than 0.");
 
-        return new Exercise(
-            Guid.NewGuid(),
-            name,
-            description,
-            muscleGroups,
-            equipments,
-            difficultyLevel,
-            videoUrl,
-            externalApiId);
+        if (restSeconds < 0)
+            throw new DomainException("Rest seconds cannot be negative.");
+
+        return new Exercise(Guid.NewGuid(), workoutId, name.Trim(), targetSets, targetReps, restSeconds, order);
     }
 
-    public static Exercise Restore(
-        Guid id,
-        ExerciseName name,
-        Description description,
-        IEnumerable<MuscleGroupType> muscleGroups,
-        IEnumerable<EquipmentType> equipments,
-        DifficultyLevel difficultyLevel,
-        string? videoUrl,
-        string? externalApiId,
-        DateTime createdAt,
-        DateTime? updatedAt)
+    public static Exercise Restore(Guid id, Guid workoutId, string name, int targetSets, int targetReps, int restSeconds, int order)
     {
-        var exercise = new Exercise(
-            id,
-            name,
-            description,
-            muscleGroups,
-            equipments,
-            difficultyLevel,
-            videoUrl,
-            externalApiId);
-
-        exercise.CreatedAt = createdAt;
-        exercise.UpdatedAt = updatedAt;
-
-        return exercise;
+        return new Exercise(id, workoutId, name, targetSets, targetReps, restSeconds, order);
     }
 
-    public void Update(
-        ExerciseName name,
-        Description description,
-        IEnumerable<MuscleGroupType> muscleGroups,
-        IEnumerable<EquipmentType> equipments,
-        DifficultyLevel difficultyLevel,
-        string? videoUrl = null,
-        string? externalApiId = null)
+    public void Update(string name, int targetSets, int targetReps, int restSeconds, int order)
     {
-        if (muscleGroups == null || !muscleGroups.Any())
-            throw new DomainException("At least one muscle group is required.");
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainException("Exercise name is required.");
 
-        if (equipments == null || !equipments.Any())
-            throw new DomainException("At least one equipment is required.");
+        if (targetSets <= 0)
+            throw new DomainException("Target sets must be greater than 0.");
 
-        Name = name;
-        Description = description;
-        DifficultyLevel = difficultyLevel;
-        VideoUrl = videoUrl;
-        ExternalApiId = externalApiId;
-        UpdatedAt = DateTime.UtcNow;
+        if (restSeconds < 0)
+            throw new DomainException("Rest seconds cannot be negative.");
 
-        _muscleGroups.Clear();
-        foreach (var muscleGroup in muscleGroups)
-            _muscleGroups.Add(muscleGroup);
-
-        _equipments.Clear();
-        foreach (var equipment in equipments)
-            _equipments.Add(equipment);
+        Name = name.Trim();
+        TargetSets = targetSets;
+        TargetReps = targetReps;
+        RestSeconds = restSeconds;
+        Order = order;
     }
 }
