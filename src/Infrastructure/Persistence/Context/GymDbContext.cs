@@ -11,6 +11,8 @@ public class GymDbContext : DbContext
     public DbSet<ExerciseMuscleGroupEntity> ExerciseMuscleGroups => Set<ExerciseMuscleGroupEntity>();
     public DbSet<ExerciseEquipmentEntity> ExerciseEquipments => Set<ExerciseEquipmentEntity>();
     public DbSet<UserEntity> Users => Set<UserEntity>();
+    public DbSet<TrainingEntity> Trainings => Set<TrainingEntity>();
+    public DbSet<TrainingExerciseEntity> TrainingExercises => Set<TrainingExerciseEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +24,7 @@ public class GymDbContext : DbContext
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
             entity.Property(e => e.VideoUrl).HasMaxLength(500);
+            entity.Property(e => e.ExternalApiId).HasMaxLength(100);
         });
 
         modelBuilder.Entity<ExerciseMuscleGroupEntity>(entity =>
@@ -52,6 +55,33 @@ public class GymDbContext : DbContext
             entity.Property(e => e.PasswordHash).IsRequired();
             entity.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
             entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<TrainingEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TrainingExerciseEntity>(entity =>
+        {
+            entity.HasKey(e => new { e.TrainingId, e.ExerciseId, e.OrderIndex });
+
+            entity.HasOne(e => e.Training)
+                .WithMany(t => t.TrainingExercises)
+                .HasForeignKey(e => e.TrainingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Exercise)
+                .WithMany()
+                .HasForeignKey(e => e.ExerciseId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

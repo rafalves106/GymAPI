@@ -11,6 +11,7 @@ public record ExerciseDto
     public List<EquipmentType> Equipments { get; init; } = new();
     public DifficultyLevel DifficultyLevel { get; init; }
     public string? VideoUrl { get; init; }
+    public string? ExternalApiId { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
 }

@@ -9,6 +9,7 @@ public class ExerciseEntity
     public string Description { get; set; } = string.Empty;
     public DifficultyLevel DifficultyLevel { get; set; }
     public string? VideoUrl { get; set; }
+    public string? ExternalApiId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 

@@ -34,6 +34,7 @@ public class ExceptionHandlingMiddleware
         {
             DomainException ex => (HttpStatusCode.BadRequest, ex.Message),
             ExerciseNotFoundException ex => (HttpStatusCode.NotFound, ex.Message),
+            TrainingNotFoundException ex => (HttpStatusCode.NotFound, ex.Message),
             KeyNotFoundException ex => (HttpStatusCode.NotFound, ex.Message),
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized access."),
             ArgumentException ex => (HttpStatusCode.BadRequest, ex.Message),

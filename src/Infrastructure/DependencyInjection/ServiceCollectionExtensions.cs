@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         // Repositories
         services.AddScoped<IExerciseRepository, ExerciseRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITrainingRepository, TrainingRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Authentication
@@ -33,6 +34,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IExerciseUseCases, ExerciseService>();
         services.AddScoped<IAuthUseCases, AuthService>();
+        services.AddScoped<ITrainingUseCases, TrainingService>();
 
         return services;
     }

@@ -24,7 +24,8 @@ public class ExerciseService : IExerciseUseCases
             request.MuscleGroups,
             request.Equipments,
             request.DifficultyLevel,
-            request.VideoUrl);
+            request.VideoUrl,
+            request.ExternalApiId);
 
         await _unitOfWork.Exercises.AddAsync(exercise);
         await _unitOfWork.SaveChangesAsync();
@@ -73,7 +74,8 @@ public class ExerciseService : IExerciseUseCases
             request.MuscleGroups,
             request.Equipments,
             request.DifficultyLevel,
-            request.VideoUrl);
+            request.VideoUrl,
+            request.ExternalApiId);
 
         _unitOfWork.Exercises.Update(exercise);
         await _unitOfWork.SaveChangesAsync();
@@ -99,6 +101,7 @@ public class ExerciseService : IExerciseUseCases
         Equipments = exercise.Equipments.ToList(),
         DifficultyLevel = exercise.DifficultyLevel,
         VideoUrl = exercise.VideoUrl,
+        ExternalApiId = exercise.ExternalApiId,
         CreatedAt = exercise.CreatedAt,
         UpdatedAt = exercise.UpdatedAt
     };

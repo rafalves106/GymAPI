@@ -16,6 +16,7 @@ public class Exercise
     public IReadOnlyCollection<EquipmentType> Equipments => _equipments.AsReadOnly();
     public DifficultyLevel DifficultyLevel { get; private set; }
     public string? VideoUrl { get; private set; }
+    public string? ExternalApiId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -32,13 +33,15 @@ public class Exercise
         IEnumerable<MuscleGroupType> muscleGroups,
         IEnumerable<EquipmentType> equipments,
         DifficultyLevel difficultyLevel,
-        string? videoUrl)
+        string? videoUrl,
+        string? externalApiId)
     {
         Id = id;
         Name = name;
         Description = description;
         DifficultyLevel = difficultyLevel;
         VideoUrl = videoUrl;
+        ExternalApiId = externalApiId;
         CreatedAt = DateTime.UtcNow;
 
         foreach (var muscleGroup in muscleGroups)
@@ -54,7 +57,8 @@ public class Exercise
         IEnumerable<MuscleGroupType> muscleGroups,
         IEnumerable<EquipmentType> equipments,
         DifficultyLevel difficultyLevel,
-        string? videoUrl = null)
+        string? videoUrl = null,
+        string? externalApiId = null)
     {
         if (muscleGroups == null || !muscleGroups.Any())
             throw new DomainException("At least one muscle group is required.");
@@ -69,7 +73,8 @@ public class Exercise
             muscleGroups,
             equipments,
             difficultyLevel,
-            videoUrl);
+            videoUrl,
+            externalApiId);
     }
 
     public static Exercise Restore(
@@ -80,6 +85,7 @@ public class Exercise
         IEnumerable<EquipmentType> equipments,
         DifficultyLevel difficultyLevel,
         string? videoUrl,
+        string? externalApiId,
         DateTime createdAt,
         DateTime? updatedAt)
     {
@@ -90,7 +96,8 @@ public class Exercise
             muscleGroups,
             equipments,
             difficultyLevel,
-            videoUrl);
+            videoUrl,
+            externalApiId);
 
         exercise.CreatedAt = createdAt;
         exercise.UpdatedAt = updatedAt;
@@ -104,7 +111,8 @@ public class Exercise
         IEnumerable<MuscleGroupType> muscleGroups,
         IEnumerable<EquipmentType> equipments,
         DifficultyLevel difficultyLevel,
-        string? videoUrl = null)
+        string? videoUrl = null,
+        string? externalApiId = null)
     {
         if (muscleGroups == null || !muscleGroups.Any())
             throw new DomainException("At least one muscle group is required.");
@@ -116,6 +124,7 @@ public class Exercise
         Description = description;
         DifficultyLevel = difficultyLevel;
         VideoUrl = videoUrl;
+        ExternalApiId = externalApiId;
         UpdatedAt = DateTime.UtcNow;
 
         _muscleGroups.Clear();

@@ -124,6 +124,7 @@ public class ExerciseTests
             new[] { EquipmentType.Barbell },
             DifficultyLevel.Advanced,
             "https://youtube.com/watch?v=789",
+            "ext-123",
             createdAt,
             updatedAt);
 

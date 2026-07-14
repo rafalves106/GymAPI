@@ -175,4 +175,112 @@ public class ExerciseServiceTests
 
         await act.Should().ThrowAsync<ExerciseNotFoundException>();
     }
+
+    [Fact]
+    public async Task GetByMuscleGroupAsync_ReturnsFilteredExercises()
+    {
+        var exercises = new List<Exercise>
+        {
+            Exercise.Create("Bench Press", "Chest", new[] { MuscleGroupType.Chest }, new[] { EquipmentType.Barbell }, DifficultyLevel.Intermediate),
+            Exercise.Create("Squat", "Legs", new[] { MuscleGroupType.Quadriceps }, new[] { EquipmentType.Barbell }, DifficultyLevel.Advanced)
+        };
+
+        _repositoryMock.Setup(r => r.GetByMuscleGroupAsync(MuscleGroupType.Chest))
+            .ReturnsAsync(exercises.Take(1));
+
+        var result = await _sut.GetByMuscleGroupAsync(MuscleGroupType.Chest);
+
+        result.Should().HaveCount(1);
+        result.First().Name.Should().Be("Bench Press");
+    }
+
+    [Fact]
+    public async Task GetByMuscleGroupAsync_NoMatches_ReturnsEmpty()
+    {
+        _repositoryMock.Setup(r => r.GetByMuscleGroupAsync(It.IsAny<MuscleGroupType>()))
+            .ReturnsAsync(new List<Exercise>());
+
+        var result = await _sut.GetByMuscleGroupAsync(MuscleGroupType.Biceps);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetByDifficultyAsync_ReturnsFilteredExercises()
+    {
+        var exercises = new List<Exercise>
+        {
+            Exercise.Create("Bench Press", "Chest", new[] { MuscleGroupType.Chest }, new[] { EquipmentType.Barbell }, DifficultyLevel.Beginner)
+        };
+
+        _repositoryMock.Setup(r => r.GetByDifficultyAsync(DifficultyLevel.Beginner))
+            .ReturnsAsync(exercises);
+
+        var result = await _sut.GetByDifficultyAsync(DifficultyLevel.Beginner);
+
+        result.Should().HaveCount(1);
+        result.First().DifficultyLevel.Should().Be(DifficultyLevel.Beginner);
+    }
+
+    [Fact]
+    public async Task GetByDifficultyAsync_NoMatches_ReturnsEmpty()
+    {
+        _repositoryMock.Setup(r => r.GetByDifficultyAsync(It.IsAny<DifficultyLevel>()))
+            .ReturnsAsync(new List<Exercise>());
+
+        var result = await _sut.GetByDifficultyAsync(DifficultyLevel.Advanced);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchByNameAsync_ReturnsMatchingExercises()
+    {
+        var exercises = new List<Exercise>
+        {
+            Exercise.Create("Bench Press", "Chest", new[] { MuscleGroupType.Chest }, new[] { EquipmentType.Barbell }, DifficultyLevel.Intermediate)
+        };
+
+        _repositoryMock.Setup(r => r.SearchByNameAsync("Bench"))
+            .ReturnsAsync(exercises);
+
+        var result = await _sut.SearchByNameAsync("Bench");
+
+        result.Should().HaveCount(1);
+        result.First().Name.Should().Contain("Bench");
+    }
+
+    [Fact]
+    public async Task SearchByNameAsync_NoMatches_ReturnsEmpty()
+    {
+        _repositoryMock.Setup(r => r.SearchByNameAsync(It.IsAny<string>()))
+            .ReturnsAsync(new List<Exercise>());
+
+        var result = await _sut.SearchByNameAsync("NonExistent");
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithExternalApiId_SetsExternalApiId()
+    {
+        var request = new CreateExerciseRequest
+        {
+            Name = "Bench Press",
+            Description = "Chest exercise with barbell",
+            MuscleGroups = new List<MuscleGroupType> { MuscleGroupType.Chest },
+            Equipments = new List<EquipmentType> { EquipmentType.Barbell },
+            DifficultyLevel = DifficultyLevel.Intermediate,
+            ExternalApiId = "ext-123"
+        };
+
+        _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Exercise>()))
+            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var result = await _sut.CreateAsync(request);
+
+        result.ExternalApiId.Should().Be("ext-123");
+    }
 }

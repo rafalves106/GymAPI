@@ -88,6 +88,7 @@ public class ExerciseRepository : IExerciseRepository
         existing.Description = exercise.Description;
         existing.DifficultyLevel = exercise.DifficultyLevel;
         existing.VideoUrl = exercise.VideoUrl;
+        existing.ExternalApiId = exercise.ExternalApiId;
         existing.UpdatedAt = exercise.UpdatedAt;
 
         _context.ExerciseMuscleGroups.RemoveRange(existing.ExerciseMuscleGroups);
@@ -135,6 +136,7 @@ public class ExerciseRepository : IExerciseRepository
             entity.ExerciseEquipments.Select(eq => eq.EquipmentType),
             entity.DifficultyLevel,
             entity.VideoUrl,
+            entity.ExternalApiId,
             entity.CreatedAt,
             entity.UpdatedAt);
     }
@@ -148,6 +150,7 @@ public class ExerciseRepository : IExerciseRepository
             Description = exercise.Description,
             DifficultyLevel = exercise.DifficultyLevel,
             VideoUrl = exercise.VideoUrl,
+            ExternalApiId = exercise.ExternalApiId,
             CreatedAt = exercise.CreatedAt,
             UpdatedAt = exercise.UpdatedAt,
             ExerciseMuscleGroups = exercise.MuscleGroups

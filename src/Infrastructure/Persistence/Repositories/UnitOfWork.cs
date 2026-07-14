@@ -7,6 +7,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly GymDbContext _context;
     private IExerciseRepository? _exerciseRepository;
+    private ITrainingRepository? _trainingRepository;
 
     public UnitOfWork(GymDbContext context)
     {
@@ -15,6 +16,9 @@ public class UnitOfWork : IUnitOfWork
 
     public IExerciseRepository Exercises =>
         _exerciseRepository ??= new ExerciseRepository(_context);
+
+    public ITrainingRepository Trainings =>
+        _trainingRepository ??= new TrainingRepository(_context);
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

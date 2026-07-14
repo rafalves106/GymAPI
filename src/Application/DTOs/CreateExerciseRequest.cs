@@ -27,4 +27,7 @@ public record CreateExerciseRequest
     [Url]
     [StringLength(500)]
     public string? VideoUrl { get; init; }
+
+    [StringLength(100)]
+    public string? ExternalApiId { get; init; }
 }
