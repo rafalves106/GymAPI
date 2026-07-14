@@ -1,0 +1,114 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstats
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+*.dbmdl
+*.jfm
+launchSettings.json
+
+## Rider
+.idea/
+*.sln.iml
+
+## VS Code
+.vscode/
+
+## NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+**/packages/repositories.config
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## EF Core
+**/Migrations/*.Designer.cs
+**/Migrations/*.cs
+!**/Migrations/*_InitialCreate.cs
+!**/Migrations/*_InitialCreate.Designer.cs
+
+## User Secrets
+**/Properties/serviceDependencies.json
+
+## Logs
+*.log
+logs/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Publish
+publish/
+*.publish.xml
+
+## NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+## JetBrains
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Cake
+tools/**
+!tools/packages.config
+
+## Tabs Studio
+*.tss
+
+## Telerik's JustMock
+*.jmconfig
+
+## BizTalk build output
+*.btp.cs
+*.btm.cs
+*.odx.cs
+*.xsd.cs
+
+## Open Cover
+analysis
+
+## Backup & Merge
+*.bak
+*.tmp
+*.orig
+*.swp
+*~
+
+## Secret Files (IMPORTANT - never commit these!)
+**/appsettings.Production.json
+**/appsettings.Staging.json
+**/secrets.json
+**/*.pfx
+**/*.key
+**/*.pem
+**/*.env
+**/.env.local
+**/.env.*.local
+
+## Docker
+docker-compose.override.yml
