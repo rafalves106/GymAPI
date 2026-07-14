@@ -27,6 +27,14 @@ public class User
         return new User(Guid.NewGuid(), email.ToLower().Trim(), passwordHash, firstName.Trim(), lastName.Trim());
     }
 
+    public static User Restore(Guid id, string email, string passwordHash, string firstName, string lastName, DateTime createdAt, DateTime? lastLoginAt)
+    {
+        var user = new User(id, email, passwordHash, firstName, lastName);
+        user.CreatedAt = createdAt;
+        user.LastLoginAt = lastLoginAt;
+        return user;
+    }
+
     public void UpdateLastLogin()
     {
         LastLoginAt = DateTime.UtcNow;

@@ -35,7 +35,7 @@ public class UserRepository : IUserRepository
 
     private static User MapToDomain(UserEntity entity)
     {
-        return User.Create(entity.Email, entity.PasswordHash, entity.FirstName, entity.LastName);
+        return User.Restore(entity.Id, entity.Email, entity.PasswordHash, entity.FirstName, entity.LastName, entity.CreatedAt, entity.LastLoginAt);
     }
 
     private static UserEntity MapToEntity(User user)
